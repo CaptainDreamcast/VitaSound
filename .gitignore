@@ -1,0 +1,6 @@
+build
+sce_sys
+*.elf
+*.vpk
+*.self
+*.o

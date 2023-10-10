@@ -23,8 +23,8 @@ OBJS   = font.o Main.o \
 		Media/FileBuffer.o \
 		Media/Audio.o
 
-LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub -lSceCommonDialog_stub \
-	-lSceCtrl_stub -lSceTouch_stub -lSceAudio_stub -lfreetype -lpng -lz -lm -lstdc++
+LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
+	-lSceCtrl_stub -lSceTouch_stub -lSceAudio_stub -lfreetype -lbz2 -lpng -lz -lm -lstdc++
 
 PREFIX  	= arm-vita-eabi
 CC      	= $(PREFIX)-gcc
