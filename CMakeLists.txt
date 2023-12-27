@@ -31,8 +31,8 @@ set(VITA_VERSION  "01.00")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-q -O2 -std=c99 -I../Nogg -I../Media")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-q -O2 -std=c++11 -I../Nogg -I../Media")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-q -O2 -std=c99 -I../Nogg -I../include")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-q -O2 -std=c++11 -I../Nogg -I../include")
 # Optional. You can specify more param.sfo flags this way.
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 
@@ -70,9 +70,9 @@ add_executable(${PROJECT_NAME}
   Nogg/src/api/open-buffer.c
   Nogg/src/api/info.c
   Nogg/src/api/close.c
-  Media/WavFile.c
-  Media/FileBuffer.c
-  Media/Audio.c
+  DrakonSound/DrakonWavFile.c
+  DrakonSound/DrakonFileBuffer.c
+  DrakonSound/DrakonSound.c
 )
 
 # Library to link to (drop the -l prefix). This will mostly be stubs.
@@ -104,4 +104,5 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
   FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
   FILE sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
   FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+  FILE test_assets test_assets
 )

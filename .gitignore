@@ -1,6 +1,8 @@
 build
 sce_sys
+test_assets
 *.elf
 *.vpk
 *.self
 *.o
+*.velf

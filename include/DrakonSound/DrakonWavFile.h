@@ -1,5 +1,5 @@
-﻿#ifndef WavFile_H
-#define WavFile_H
+﻿#ifndef DrakonWavFile_H
+#define DrakonWavFile_H
 
 #include <stdint.h>
 
@@ -22,9 +22,9 @@ typedef struct WaveHeader
 	uint32_t	headerByte;		/* header length */
 	uint32_t	dataChunkSize;	/* data length */
 
-} WaveHeader;
+} DrakonWaveHeader;
 
 
-int32_t ParseWaveHeader(WaveHeader *pHeader,uint8_t *pucCodecAddr,uint32_t uiInputByte);
+int32_t DrakonParseWaveHeader(DrakonWaveHeader *pHeader,uint8_t *pucCodecAddr,uint32_t uiInputByte);
 
 #endif

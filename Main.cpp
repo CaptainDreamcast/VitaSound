@@ -9,15 +9,16 @@
 #include <psp2/ctrl.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/touch.h>
+#include <psp2/io/fcntl.h>
 #include <vita2d.h>
 
 //audio
 extern "C"
 {
-	#include "Audio.h"
+	#include "DrakonSound/DrakonSound.h"
 }
 
-AudioHandler _audio;
+DrakonAudioHandler _audio;
 
 
 extern unsigned int basicfont_size;
@@ -66,20 +67,48 @@ void init_stuff()
 	beginTime = (long)begin;
 
 	//init sound
-	InitializeAudio(&_audio);
+	DrakonInitializeAudio(&_audio);
+	
+	DrakonSetVolume(0.2);
 	
 	//load sound
 	//stream ogg from file as background soud - only 1 background sound possible
-	LoadOgg(&_audio, "ux0:/data/hype.ogg", AUDIO_OUT_BGM,0);
+	if(0) {
+		DrakonLoadOgg(&_audio, "app0:/./test_assets/hype.ogg", AUDIO_OUT_BGM,0);
+	}
+	
+	//stream wav from buffer as main sound - 8 sounds possible
+	if(1) {
+		void* wavData;
+		const char* filename = "app0:/test_assets/suspense_11k.wav";
+		SceUID fileHandle = sceIoOpen(filename, SCE_O_RDONLY, 0);
+		size_t wavSize = sceIoLseek(fileHandle, 0, SCE_SEEK_END);
+		printf("size: %d\n", wavSize);
+		wavData = malloc(wavSize);
+		sceIoLseek(fileHandle, 0, SCE_SEEK_SET);
+		sceIoRead(fileHandle, wavData, wavSize);
+		sceIoClose(fileHandle);
+		printf("start playing\n");
+		DrakonLoadWavFromMemory(&_audio, wavData, wavSize, AUDIO_OUT_MAIN);
+		free(wavData);
+	}
+	
+	if(0) {
+		DrakonLoadWav(&_audio, "app0:/test_assets/suspense_11k.wav", AUDIO_OUT_MAIN,0);
+	}
 	
 	//stream wav from file as main sound - 8 sounds possible
-	//LoadWav(&_audio, "cache0:/VitaDefilerClient/Documents/music.wav", AUDIO_OUT_MAIN,0);
+	if(0) {
+		DrakonLoadWav(&_audio, "app0:/test_assets/suspense.wav", AUDIO_OUT_MAIN,0);
+	}
 	
 	//load wav from to memory and play as main sound - 8 sounds possible
-	//LoadWav(&_audio, "cache0:/VitaDefilerClient/Documents/organ.wav", AUDIO_OUT_MAIN,1);
+	if(0) {
+		DrakonLoadWav(&_audio, "app0:/test_assets/suspense.wav", AUDIO_OUT_MAIN,1);
+	}
 	
 	//play sound
-	PlayAudio(&_audio);
+	DrakonPlayAudio(&_audio);
 }
 
 int main()
@@ -131,8 +160,8 @@ int main()
 		CalcFPS();
     }
 	
-	StopAudio(&_audio);
-	TerminateAudio(&_audio);
+	DrakonStopAudio(&_audio);
+	DrakonTerminateAudio(&_audio);
 
     vita2d_fini();
     vita2d_free_font(font);

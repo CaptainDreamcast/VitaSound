@@ -1,11 +1,11 @@
 ﻿#include <stdio.h>
 #include <string.h>
 
-#include "WavFile.h"
+#include <DrakonSound/DrakonWavFile.h>
 
 static uint32_t _getN(uint8_t *pucCodecAddr,uint32_t *pReadbyte,uint32_t size);
 
-int32_t ParseWaveHeader(WaveHeader *pHeader,uint8_t *pucCodecAddr,uint32_t uiInputByte)
+int32_t DrakonParseWaveHeader(DrakonWaveHeader *pHeader,uint8_t *pucCodecAddr,uint32_t uiInputByte)
 {
 	uint32_t chunkLength;
 	int32_t  format;

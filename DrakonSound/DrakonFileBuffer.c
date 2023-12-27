@@ -1,15 +1,15 @@
 ﻿#include <stdio.h>
 #include <string.h>
 
-#include "FileBuffer.h"
+#include <DrakonSound/DrakonFileBuffer.h>
 
-static int32_t GetBufferCurrentCount2(FileBuffer* fileBuffer);
+static int32_t DrakonGetBufferCurrentCount2(DrakonFileBuffer* fileBuffer);
 
-int32_t CreateBuffer(FileBuffer* fileBuffer, uint8_t* buf, uint32_t size)
+int32_t DrakonCreateBuffer(DrakonFileBuffer* fileBuffer, uint8_t* buf, uint32_t size)
 {
 	int32_t ret = 0;
 
-	memset(fileBuffer, 0, sizeof(FileBuffer));
+	memset(fileBuffer, 0, sizeof(DrakonFileBuffer));
 
 	fileBuffer->read  = 0;
 	fileBuffer->write = 0;
@@ -31,7 +31,7 @@ int32_t CreateBuffer(FileBuffer* fileBuffer, uint8_t* buf, uint32_t size)
 	return ret;
 }
 
-int32_t DeleteBuffer(FileBuffer* fileBuffer)
+int32_t DrakonDeleteBuffer(DrakonFileBuffer* fileBuffer)
 {
 	int32_t ret = 0;
 
@@ -46,7 +46,7 @@ int32_t DeleteBuffer(FileBuffer* fileBuffer)
 	return ret;
 }
 
-int32_t ResetBuffer(FileBuffer* fileBuffer)
+int32_t DrakonResetBuffer(DrakonFileBuffer* fileBuffer)
 {
 	int32_t ret = 0;
 
@@ -57,14 +57,14 @@ int32_t ResetBuffer(FileBuffer* fileBuffer)
 	return ret;
 }
 
-int32_t SetBufferData(FileBuffer* fileBuffer, uint8_t* data, uint32_t setSize)
+int32_t DrakonSetBufferData(DrakonFileBuffer* fileBuffer, uint8_t* data, uint32_t setSize)
 {
 	int32_t  ret = 0;
 	uint8_t* dstBuf;
 
 	sceKernelLockMutex( &fileBuffer->lock, 1, 0 );
 
-	if ( setSize > GetBufferCapacity(fileBuffer) ) 
+	if ( setSize > DrakonGetBufferCapacity(fileBuffer) ) 
 	{
 		ret = RINGBUF_ERROR_INVALID_VALUE;
 		sceKernelUnlockMutex ( &fileBuffer->lock, 1 );
@@ -100,7 +100,7 @@ int32_t SetBufferData(FileBuffer* fileBuffer, uint8_t* data, uint32_t setSize)
 	return ret;
 }
 
-int32_t GetBufferData(FileBuffer* fileBuffer, uint8_t* data, uint32_t getSize)
+int32_t DrakonGetBufferData(DrakonFileBuffer* fileBuffer, uint8_t* data, uint32_t getSize)
 {
 	int32_t ret = 0;
 	uint32_t readNum = 0;
@@ -109,14 +109,14 @@ int32_t GetBufferData(FileBuffer* fileBuffer, uint8_t* data, uint32_t getSize)
 
 	sceKernelLockMutex ( &fileBuffer->lock, 1, 0 );
 
-	if ( getSize > GetBufferCurrentCount(fileBuffer) )
+	if ( getSize > DrakonGetBufferCurrentCount(fileBuffer) )
 	{
 		ret = RINGBUF_ERROR_INVALID_VALUE;
 		sceKernelUnlockMutex( &fileBuffer->lock, 1 );
 		return ret;
 	}
 
-	len = GetBufferCurrentCount2 ( fileBuffer );
+	len = DrakonGetBufferCurrentCount2 ( fileBuffer );
 
 	if ( len < getSize )
 	{
@@ -147,7 +147,7 @@ int32_t GetBufferData(FileBuffer* fileBuffer, uint8_t* data, uint32_t getSize)
 	return ret;
 }
 
-int32_t GetBufferCapacity(FileBuffer* fileBuffer)
+int32_t DrakonGetBufferCapacity(DrakonFileBuffer* fileBuffer)
 {
 	int32_t ret = 0;
 
@@ -157,7 +157,7 @@ int32_t GetBufferCapacity(FileBuffer* fileBuffer)
 	return ret;
 }
 
-int32_t GetBufferCurrentCount(FileBuffer* fileBuffer)
+int32_t DrakonGetBufferCurrentCount(DrakonFileBuffer* fileBuffer)
 {
 	int32_t ret = 0;
 
@@ -167,7 +167,7 @@ int32_t GetBufferCurrentCount(FileBuffer* fileBuffer)
 	return ret;
 }
 
-static int32_t GetBufferCurrentCount2(FileBuffer* fileBuffer)
+static int32_t DrakonGetBufferCurrentCount2(DrakonFileBuffer* fileBuffer)
 {
 	int32_t ret = 0;
 	uint32_t diff;
