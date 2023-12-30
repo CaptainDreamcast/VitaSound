@@ -57,7 +57,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("sceIoLseek() 0x%08x\n", ret);
+		//printf("sceIoLseek() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -66,7 +66,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0) 
 	{
-		printf("sceIoLseek() 0x%08x\n", ret);
+		//printf("sceIoLseek() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -84,7 +84,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("sceIoLseek() 0x%08x\n", ret);
+		//printf("sceIoLseek() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -98,7 +98,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 		if (ret < 0)
 		{
-			printf ("ERROR: sceIoRead () 0x%08x\n", ret);
+			//printf ("ERROR: sceIoRead () 0x%08x\n", ret);
 			goto term;
 		}
 
@@ -111,7 +111,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("ERROR: _sceParseWaveHeader() %d\n", ret);
+		//printf("ERROR: _sceParseWaveHeader() %d\n", ret);
 		goto term;
 	}
 
@@ -120,7 +120,7 @@ static int32_t readWavHeader(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("sceIoLseek() 0x%08x\n", ret);
+		//printf("sceIoLseek() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -148,21 +148,34 @@ static int32_t readWavHeaderFromMemory(DrakonAudioHandler* audioHandler, void* t
 		readHeaderSize = tSize;
 	}
 
+	if(!audioHandler->header)
+	{
+		//printf("Header buffer not allocated\n");
+		return 0;
+	}
 	memcpy(audioHandler->header, tData, readHeaderSize);
+	
 	ret = DrakonParseWaveHeader(&header, audioHandler->header, readHeaderSize);
 
 	if (ret < 0)
 	{
-		printf("ERROR: _sceParseWaveHeader() %d\n", ret);
-		goto term;
+		//printf("ERROR: _sceParseWaveHeader() %d\n", ret);
+		return ret;
 	}
 
 	audioHandler->dataSize		= header.dataChunkSize;
 	audioHandler->offset		= header.headerByte;
 	audioHandler->channels		= header.nChannels;
 	audioHandler->samplingRate	= header.samplingRate;
+	
+	/*
+	//printf("size: %d\n", audioHandler->dataSize);
+	//printf("offset: %d\n", audioHandler->offset);
+	//printf("channels: %d\n", audioHandler->channels);
+	//printf("samplingRate: %d\n", audioHandler->samplingRate);
+	//printf("bits: %d\n", header.bits);
+	*/
 
-  term:
 	return ret;
 }
 
@@ -178,7 +191,7 @@ static int32_t soundThread(uint32_t args, void *argc )
 	int32_t  param;
 	DrakonAudioHandler* audioHandler;
 
-	printf ( "# Start-SoundThread\n" );
+	//printf ( "# Start-SoundThread\n" );
 
 	audioHandler = *(DrakonAudioHandler**)(argc);
 
@@ -220,7 +233,7 @@ static int32_t soundThread(uint32_t args, void *argc )
 
 	if (portId < 0)
 	{
-		printf("Error: sceAudioOutOpenPort() 0x%08x\n",portId);
+		//printf("Error: sceAudioOutOpenPort() 0x%08x\n",portId);
 		goto term;
 	}
 
@@ -254,7 +267,7 @@ static int32_t soundThread(uint32_t args, void *argc )
 			ret = sceAudioOutOutput(portId, audioHandler->wavBuff[side]);
 			if(ret < 0)
 			{
-				printf ("Error: sceAudioOutOutput() 0x%08x\n",ret);
+				//printf ("Error: sceAudioOutOutput() 0x%08x\n",ret);
 				break;
 			}
 			side ^= 0x01;
@@ -262,7 +275,7 @@ static int32_t soundThread(uint32_t args, void *argc )
 		else
 		{
 			/*E buffer underflow!! */
-			printf ("currentCount = %u\n", DrakonGetBufferCurrentCount(audioHandler->fileBuffer));
+			//printf ("currentCount = %u\n", DrakonGetBufferCurrentCount(audioHandler->fileBuffer));
 			sceKernelDelayThread(1000);
 		}
 	}
@@ -273,12 +286,12 @@ static int32_t soundThread(uint32_t args, void *argc )
 	ret = sceAudioOutReleasePort(portId);
 	if(ret < 0)
 	{
-		printf("Error: sceAudioOutReleasePort() 0x%08x\n",ret);
+		//printf("Error: sceAudioOutReleasePort() 0x%08x\n",ret);
 		goto term;
 	}
 
 term:
-	printf("# End-SoundThread\n");
+	//printf("# End-SoundThread\n");
 	audioHandler->endflag = AUDIO_STATUS_END;
 	ret = sceKernelExitDeleteThread(0);
 	return ret;
@@ -389,7 +402,7 @@ static int32_t readThread(uint32_t args, void *argc)
 	uint32_t capacity;
 	DrakonAudioHandler* audioHandler;
 
-	printf ( "# Start-ReadThread\n" );
+	//printf ( "# Start-ReadThread\n" );
 
 	audioHandler = *(DrakonAudioHandler**)(argc);
 
@@ -399,7 +412,7 @@ static int32_t readThread(uint32_t args, void *argc)
 	{
 		if (audioHandler->mode == AUDIO_OUT_MAIN && audioHandler->samplingRate != 48000)
 		{
-			printf("resampling from %d to %d for mode %d with channel count %d\n", audioHandler->samplingRate, 48000, audioHandler->mode, audioHandler->channels);
+			//printf("resampling from %d to %d for mode %d with channel count %d\n", audioHandler->samplingRate, 48000, audioHandler->mode, audioHandler->channels);
 			ClownResampler_Precompute(&audioHandler->resamplerPrecomputation);
 
 			/* Create a resampler that converts from the sample rate of the MP3 to the sample rate of the playback device. */
@@ -430,7 +443,7 @@ static int32_t readThread(uint32_t args, void *argc)
 
 					if (capacity < 0)
 					{
-						printf("ERROR: sceIoRead () 0x%08x\n", capacity);
+						//printf("ERROR: sceIoRead () 0x%08x\n", capacity);
 						goto term;
 					}
 
@@ -495,7 +508,7 @@ static int32_t readThread(uint32_t args, void *argc)
 
 					if (ret < 0)
 					{
-						printf("ERROR: sceIoRead () 0x%08x\n", ret);
+						//printf("ERROR: sceIoRead () 0x%08x\n", ret);
 						goto term;
 					}
 
@@ -536,7 +549,7 @@ static int32_t readThread(uint32_t args, void *argc)
 
 					if (count < 0)
 					{
-						printf("ERROR: sceIoRead () 0x%08x\n", ret);
+						//printf("ERROR: sceIoRead () 0x%08x\n", ret);
 						goto term;
 					}
 
@@ -544,7 +557,7 @@ static int32_t readThread(uint32_t args, void *argc)
 					{
 						if(!audioHandler->isLooping) // This might happen with some samples during a loop
 						{
-							printf("Warning: possible corruption at sample \n");
+							//printf("Warning: possible corruption at sample \n");
 							goto term;
 						}
 					}
@@ -552,15 +565,15 @@ static int32_t readThread(uint32_t args, void *argc)
 					{
 						if (error == VORBIS_ERROR_DECODE_FAILED)
 						{
-							printf("Decode failed at sample d\n");
+							//printf("Decode failed at sample d\n");
 						}
 						else if (error == VORBIS_ERROR_INSUFFICIENT_RESOURCES)
 						{
-							printf("Out of memory at sample d\n");
+							//printf("Out of memory at sample d\n");
 						}
 						else
 						{
-							printf("Unexpected libnogg error %d at sample \n", error);
+							//printf("Unexpected libnogg error %d at sample \n", error);
 						}
 
 						goto term;
@@ -582,7 +595,7 @@ static int32_t readThread(uint32_t args, void *argc)
 	
 
 term:
-	printf("# End-ReadThread\n");
+	//printf("# End-ReadThread\n");
 	audioHandler->readEnd = AUDIO_READFLAG_READEND;
 	ret = sceKernelExitDeleteThread(0);
 	return ret;
@@ -610,7 +623,7 @@ int32_t DrakonTestOgg(DrakonAudioHandler* audioHandler)
 		free(buf);
 	}
 
-	printf("Samples read %d\n", readData);
+	//printf("Samples read %d\n", readData);
 
 	return 0;
 }
@@ -627,7 +640,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (audioHandler->buffer == NULL) 
 	{
-		printf("ERROR: malloc buffer\n");
+		//printf("ERROR: malloc buffer\n");
 		ret = AUDIO_ERROR_OUT_OF_MEMORY;
 		goto error;
 	}
@@ -636,7 +649,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (audioHandler->header == NULL)
 	{
-		printf("ERROR: malloc header\n");
+		//printf("ERROR: malloc header\n");
 		ret = AUDIO_ERROR_OUT_OF_MEMORY;
 		goto error;
 	}
@@ -645,7 +658,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (audioHandler->readBuf == NULL)
 	{
-		printf("ERROR: malloc readBuf\n");
+		//printf("ERROR: malloc readBuf\n");
 		ret = AUDIO_ERROR_OUT_OF_MEMORY;
 		goto error;
 	}
@@ -654,7 +667,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if(audioHandler->fileBuffer== NULL)
 	{
-		printf("ERROR: malloc fileBuffer\n");
+		//printf("ERROR: malloc fileBuffer\n");
 		ret = AUDIO_ERROR_OUT_OF_MEMORY;
 		goto error;
 	}
@@ -663,7 +676,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0) 
 	{
-		printf("ERROR: CreateBuffer () 0x%08x\n", ret);
+		//printf("ERROR: CreateBuffer () 0x%08x\n", ret);
 		goto error;
 	}
 
@@ -679,7 +692,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (audioHandler->soundThread < 0)
 	{
-		printf("Error: sceKernelCreateThread 0x%08x\n", audioHandler->soundThread);
+		//printf("Error: sceKernelCreateThread 0x%08x\n", audioHandler->soundThread);
 		ret = audioHandler->soundThread;
 		goto error;
 	}
@@ -696,7 +709,7 @@ int32_t DrakonInitializeAudio(DrakonAudioHandler* audioHandler)
 
 	if (audioHandler->readThread < 0)
 	{
-		printf("Error: sceKernelCreateThread 0x%08x\n", audioHandler->readThread);
+		//printf("Error: sceKernelCreateThread 0x%08x\n", audioHandler->readThread);
 		ret = audioHandler->readThread;
 		goto error;
 	}
@@ -722,6 +735,12 @@ error:
 		DrakonDeleteBuffer(audioHandler->fileBuffer);
 		free(audioHandler->fileBuffer);
 		audioHandler->fileBuffer = NULL;
+	}
+	
+	if ( audioHandler->fillBuf)
+	{
+		free ( audioHandler->fillBuf );
+		audioHandler->fillBuf = NULL;
 	}
 
 	if (audioHandler->readBuf)
@@ -778,6 +797,12 @@ int32_t DrakonTerminateAudio(DrakonAudioHandler* audioHandler)
 		sceIoClose ( audioHandler->fileHandle );
 		audioHandler->fileHandle = -1;
 	}
+	
+	if ( audioHandler->fillBuf )
+	{
+		free ( audioHandler->fillBuf );
+		audioHandler->fillBuf = NULL;
+	}
 
 	if ( audioHandler->fileBuffer )
 	{
@@ -829,7 +854,7 @@ int32_t DrakonLoadOgg(DrakonAudioHandler* audioHandler, const char* filename, Sc
 
 	if (audioHandler->fileHandle < 0)
 	{
-		printf("sceIoOpen() 0x%08x\n", audioHandler->fileHandle);
+		//printf("sceIoOpen() 0x%08x\n", audioHandler->fileHandle);
 		ret = audioHandler->fileHandle;
 		goto error;
 	}
@@ -840,23 +865,23 @@ int32_t DrakonLoadOgg(DrakonAudioHandler* audioHandler, const char* filename, Sc
 	{
 		if (error == VORBIS_ERROR_INSUFFICIENT_RESOURCES)
 		{
-			printf("LoadOgg Out of memory\n");
+			//printf("LoadOgg Out of memory\n");
 		}
 		else if (error == VORBIS_ERROR_STREAM_INVALID)
 		{
-			printf("LoadOgg Invalid stream format\n");
+			//printf("LoadOgg Invalid stream format\n");
 		}
 		else if (error == VORBIS_ERROR_STREAM_END)
 		{
-			printf("LoadOgg Unexpected EOF\n");
+			//printf("LoadOgg Unexpected EOF\n");
 		}
 		else if (error == VORBIS_ERROR_DECODE_SETUP_FAILED)
 		{
-			printf("LoadOgg Failed to initialize decoder\n");
+			//printf("LoadOgg Failed to initialize decoder\n");
 		}
 		else
 		{
-			printf("LoadOgg Unexpected libnogg error %d\n", error);
+			//printf("LoadOgg Unexpected libnogg error %d\n", error);
 		}
 
 		ret = -1;
@@ -925,7 +950,7 @@ int32_t DrakonLoadWavFromMemory(DrakonAudioHandler* audioHandler, void* data, si
 
 	if (ret < 0)
 	{
-		printf("ERROR: readHeader() 0x%08x\n", ret);
+		//printf("ERROR: readHeader() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -938,7 +963,7 @@ int32_t DrakonLoadWavFromMemory(DrakonAudioHandler* audioHandler, void* data, si
 
 		if (audioHandler->fillBuf == NULL)
 		{
-			printf("ERROR: malloc fillBuf\n");
+			//printf("ERROR: malloc fillBuf\n");
 			ret = AUDIO_ERROR_OUT_OF_MEMORY;
 			goto error;
 		}
@@ -1000,7 +1025,7 @@ int32_t DrakonLoadWav(DrakonAudioHandler* audioHandler, const char* filename, Sc
 
 	if (audioHandler->fileHandle < 0)
 	{
-		printf("sceIoOpen() 0x%08x\n", audioHandler->fileHandle);
+		//printf("sceIoOpen() 0x%08x\n", audioHandler->fileHandle);
 		ret = audioHandler->fileHandle;
 		goto error;
 	}
@@ -1009,7 +1034,7 @@ int32_t DrakonLoadWav(DrakonAudioHandler* audioHandler, const char* filename, Sc
 
 	if (ret < 0)
 	{
-		printf("ERROR: readHeader() 0x%08x\n", ret);
+		//printf("ERROR: readHeader() 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -1023,7 +1048,7 @@ int32_t DrakonLoadWav(DrakonAudioHandler* audioHandler, const char* filename, Sc
 
 		if (audioHandler->fillBuf == NULL)
 		{
-			printf("ERROR: malloc fillBuf\n");
+			//printf("ERROR: malloc fillBuf\n");
 			ret = AUDIO_ERROR_OUT_OF_MEMORY;
 			goto error;
 		}
@@ -1032,7 +1057,7 @@ int32_t DrakonLoadWav(DrakonAudioHandler* audioHandler, const char* filename, Sc
 
 		if (ret < 0)
 		{
-			printf("ERROR: sceIoRead () 0x%08x\n", ret);
+			//printf("ERROR: sceIoRead () 0x%08x\n", ret);
 			goto term;
 		}
 	}
@@ -1083,7 +1108,7 @@ int32_t DrakonPlayAudio(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("Error: [readThread]sceKernelStartThread 0x%08x\n", ret);
+		//printf("Error: [readThread]sceKernelStartThread 0x%08x\n", ret);
 		goto term;
 	}
 
@@ -1091,7 +1116,7 @@ int32_t DrakonPlayAudio(DrakonAudioHandler* audioHandler)
 
 	if (ret < 0)
 	{
-		printf("Error: [soundThread]sceKernelStartThread 0x%08x\n", ret);
+		//printf("Error: [soundThread]sceKernelStartThread 0x%08x\n", ret);
 		goto term;
 	}
 
